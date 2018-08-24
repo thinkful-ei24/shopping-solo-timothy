@@ -2,10 +2,10 @@
 
 const STORE = {
     items:[
-        {name: "apples", checked: false},
-        {name: "oranges", checked: false},
-        {name: "milk", checked: true},
-        {name: "bread", checked: false}
+        {name: "apples", checked: false, isBeingEdited: false},
+        {name: "oranges", checked: false, isBeingEdited: false},
+        {name: "milk", checked: true, isBeingEdited: false},
+        {name: "bread", checked: false, isBeingEdited: true}
     ],
     hideChecked: false,
     searchTerm: null,
@@ -17,11 +17,15 @@ const SEARCHFORM = document.querySelector('#js-search-form');
 const SEARCHINPUT = document.querySelector(".js-shopping-list-search");
 const CHECKBOX = document.querySelector('.display-checkbox');
 
-
 const generateListElement = (item, itemIndex) => {
+    const itemIsChecked = item.checked ? 'shopping-item__checked' : '';
+    const itemElement = !item.isBeingEdited ? 
+      `<span class="shopping-item js-shopping-item ${itemIsChecked}">${item.name}</span>` :
+      `<input class="item-edit-input" type="text" required value="${item.name}">`;
+
     return `
     <li class="js-item-index-element" data-item-index="${itemIndex}">
-      <span class="shopping-item js-shopping-item ${item.checked ? "shopping-item__checked" : ''}">${item.name}</span>
+      ${itemElement}
       <div class="shopping-item-controls">
         <button class="shopping-item-toggle js-item-toggle">
             <span class="button-label">check</span>
@@ -155,18 +159,58 @@ const handleItemSearch = () => {
   });
 };
 
+const toggleItemIsBeingEdited = itemIndex => {
+  //This function toggles the isBeingEdited property on the specified object in the Store
+  console.log('item is being edited');
+  STORE.items[itemIndex].isBeingEdited = true;
+}
+
+const handleClickItemName = () => {
+  //This function handles when user clicks on an item in the list
+  console.log('Item name clicked');
+  UNORDEREDLIST.addEventListener('click', event => {
+    console.log('item is being edited');
+    if(event.target.classList.contains('shopping-item')){
+      const itemIndex = getItemIndexFromElement(event.target);
+      toggleItemIsBeingEdited(itemIndex);
+      renderShoppingList();
+    }
+  });
+};
+
+const editItemName = (itemIndex, newItemName) => {
+  console.log('editing');
+  STORE.items[itemIndex].name = newItemName;
+  STORE.items[itemIndex].isBeingEdited = false;
+};  
+
+const handleEditItemName = () => {
+  // This edits the name of the item in the list
+  UNORDEREDLIST.addEventListener('keydown', event => {
+     if(event.target.classList.contains('item-edit-input') && event.keyCode === 13){
+      const newItemName = event.target.value;
+      console.log('handleEditItemName is working' + newItemName);
+      const itemIndex = getItemIndexFromElement(event.target);
+      editItemName(itemIndex, newItemName);
+      renderShoppingList(); 
+    } 
+  });
+}
+
 // this function will be our callback when the page loads. it's responsible for
 // initially rendering the shopping list, and activating our individual functions
 // that handle new item submission and user clicks on the "check" and "delete" buttons
 // for individual shopping list items.
-function handleShoppingList() {
+const handleShoppingList = () => {
   renderShoppingList();
   handleNewItemSubmit();
   handleItemCheckClicked();
   handleDeleteItemClicked();
   handleHideCheckedItems();
   handleItemSearch();
-}
+  handleClickItemName();
+  handleEditItemName();
+};
 
 // when the page loads, call `handleShoppingList`
 $(handleShoppingList);
