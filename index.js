@@ -46,7 +46,8 @@ function generateShoppingItemsString(shoppingList) {
 function renderShoppingList() {
   let filteredItems = [...STORE.items];
   if(STORE.searchTerm) {
-    filteredItems = filteredItems.filter(item => item.name.toLowerCase.match(STORE.searchTerm.toLowerCase));
+    console.log(STORE.searchTerm);  
+    filteredItems = filteredItems.filter(item => item.name.toLowerCase().match(STORE.searchTerm.toLowerCase()));
   }
   if(STORE.hideChecked) {
     filteredItems = filteredItems.filter(item => !item.checked);
