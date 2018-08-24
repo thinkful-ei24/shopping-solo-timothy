@@ -63,7 +63,6 @@ function renderShoppingList() {
   const shoppingListItemsString = generateShoppingItemsString(filteredItems);
   // insert that HTML into the DOM
   UNORDEREDLIST.innerHTML = shoppingListItemsString;
-  handleEditItemName();
     // $('.js-shopping-list').html(shoppingListItemsString);
 }
 
@@ -176,6 +175,7 @@ const handleClickItemName = () => {
       const itemIndex = getItemIndexFromElement(event.target);
       toggleItemIsBeingEdited(itemIndex);
       renderShoppingList();
+      handleEditItemName();
     }
   });
 };
