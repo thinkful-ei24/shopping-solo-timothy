@@ -187,13 +187,13 @@ const editItemName = (itemIndex, newItemName) => {
 
 const handleEditItemName = () => {
   // This edits the name of the item in the list
-  console.log("HElP!");
-  if(!document.querySelector('#edit-item-form')) return;
-  document.querySelector('#edit-item-form').addEventListener('submit', event => {
+  const editItemForm = document.querySelector('#edit-item-form');
+  if(!editItemForm) return;
+  editItemForm.addEventListener('submit', event => {
     event.preventDefault();
-    const newItemName = document.querySelector('.item-edit-input').value;
-    console.log('handleEditItemName is working' + newItemName);
-    const itemIndex = getItemIndexFromElement(document.querySelector('.item-edit-input'));
+    const editInput = editItemForm.querySelector('input');
+    const newItemName = editInput.value;
+    const itemIndex = getItemIndexFromElement(editInput);
     editItemName(itemIndex, newItemName);
     renderShoppingList(); 
   });
