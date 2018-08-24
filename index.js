@@ -5,11 +5,10 @@ const STORE = {
         {name: "apples", checked: false, isBeingEdited: false},
         {name: "oranges", checked: false, isBeingEdited: false},
         {name: "milk", checked: true, isBeingEdited: false},
-        {name: "bread", checked: false, isBeingEdited: true}
+        {name: "bread", checked: false, isBeingEdited: false}
     ],
     hideChecked: false,
     searchTerm: null,
-    sortBy: 'alpha'
 }
 const UNORDEREDLIST = document.querySelector('.js-shopping-list');
 const TEXTINPUT = document.querySelector('.js-shopping-list-entry');
@@ -19,9 +18,10 @@ const CHECKBOX = document.querySelector('.display-checkbox');
 
 const generateListElement = (item, itemIndex) => {
     const itemIsChecked = item.checked ? 'shopping-item__checked' : '';
+
     const itemElement = !item.isBeingEdited ? 
       `<span class="shopping-item js-shopping-item ${itemIsChecked}">${item.name}</span>` :
-      `<input class="item-edit-input" type="text" required value="${item.name}">`;
+      `<input class="item-edit-input" type="text" required="true" value="${item.name}">`;
 
     return `
     <li class="js-item-index-element" data-item-index="${itemIndex}">
@@ -40,9 +40,7 @@ const generateListElement = (item, itemIndex) => {
 
 
 function generateShoppingItemsString(shoppingList) {
-  console.log(shoppingList);
   const listElements = shoppingList.map(generateListElement);
-  console.log(listElements);
   return listElements.join('');
 }
 
@@ -179,7 +177,6 @@ const handleClickItemName = () => {
 };
 
 const editItemName = (itemIndex, newItemName) => {
-  console.log('editing');
   STORE.items[itemIndex].name = newItemName;
   STORE.items[itemIndex].isBeingEdited = false;
 };  
