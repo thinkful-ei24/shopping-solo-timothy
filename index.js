@@ -2,13 +2,14 @@
 
 const STORE = {
     items:[
-        {name: "apples", checked: false, isBeingEdited: false},
-        {name: "oranges", checked: false, isBeingEdited: false},
-        {name: "milk", checked: true, isBeingEdited: false},
-        {name: "bread", checked: false, isBeingEdited: false}
+        {name: "apples", checked: false },
+        {name: "oranges", checked: false },
+        {name: "milk", checked: true },
+        {name: "bread", checked: false }
     ],
     hideChecked: false,
     searchTerm: null,
+    indexOfItemBeingEdited: null
 }
 const UNORDEREDLIST = document.querySelector('.js-shopping-list');
 const TEXTINPUT = document.querySelector('.js-shopping-list-entry');
@@ -18,9 +19,12 @@ const CHECKBOX = document.querySelector('.display-checkbox');
 
 const generateListElement = (item, itemIndex) => {
     const itemIsChecked = item.checked ? 'shopping-item__checked' : '';
-    const itemElement = !item.isBeingEdited ? 
+    const itemIsBeingEdited = itemIndex === STORE.indexOfItemBeingEdited;
+    const itemElement = !itemIsBeingEdited ? 
       `<span class="shopping-item js-shopping-item ${itemIsChecked}">${item.name}</span>` :
-      `<input class="item-edit-input" type="text" required="true" value="${item.name}">`;
+      `<form id="edit-item-form">
+        <input class="item-edit-input" type="text" required="true" value="${item.name}">
+      </form>`;
 
     return `
     <li class="js-item-index-element" data-item-index="${itemIndex}">
@@ -35,6 +39,7 @@ const generateListElement = (item, itemIndex) => {
       </div>
     </li>
     `
+
 };
 
 
@@ -52,12 +57,13 @@ function renderShoppingList() {
   }
   if(STORE.hideChecked) {
     filteredItems = filteredItems.filter(item => !item.checked);
-  } 
+  }
   // render the shopping list in the DOM
   console.log('`renderShoppingList` ran');
   const shoppingListItemsString = generateShoppingItemsString(filteredItems);
   // insert that HTML into the DOM
   UNORDEREDLIST.innerHTML = shoppingListItemsString;
+  handleEditItemName();
     // $('.js-shopping-list').html(shoppingListItemsString);
 }
 
@@ -159,14 +165,13 @@ const handleItemSearch = () => {
 const toggleItemIsBeingEdited = itemIndex => {
   //This function toggles the isBeingEdited property on the specified object in the Store
   console.log('item is being edited');
-  STORE.items[itemIndex].isBeingEdited = true;
-}
+  STORE.indexOfItemBeingEdited = itemIndex;
+};
 
 const handleClickItemName = () => {
   //This function handles when user clicks on an item in the list
-  console.log('Item name clicked');
   UNORDEREDLIST.addEventListener('click', event => {
-    console.log('item is being edited');
+    // console.log('item is being edited');
     if(event.target.classList.contains('shopping-item')){
       const itemIndex = getItemIndexFromElement(event.target);
       toggleItemIsBeingEdited(itemIndex);
@@ -177,19 +182,20 @@ const handleClickItemName = () => {
 
 const editItemName = (itemIndex, newItemName) => {
   STORE.items[itemIndex].name = newItemName;
-  STORE.items[itemIndex].isBeingEdited = false;
+  STORE.indexOfItemBeingEdited = null;
 };  
 
 const handleEditItemName = () => {
   // This edits the name of the item in the list
-  UNORDEREDLIST.addEventListener('keydown', event => {
-     if(event.target.classList.contains('item-edit-input') && event.keyCode === 13){
-      const newItemName = event.target.value;
-      console.log('handleEditItemName is working' + newItemName);
-      const itemIndex = getItemIndexFromElement(event.target);
-      editItemName(itemIndex, newItemName);
-      renderShoppingList(); 
-    } 
+  console.log("HElP!");
+  if(!document.querySelector('#edit-item-form')) return;
+  document.querySelector('#edit-item-form').addEventListener('submit', event => {
+    event.preventDefault();
+    const newItemName = document.querySelector('.item-edit-input').value;
+    console.log('handleEditItemName is working' + newItemName);
+    const itemIndex = getItemIndexFromElement(document.querySelector('.item-edit-input'));
+    editItemName(itemIndex, newItemName);
+    renderShoppingList(); 
   });
 }
 
@@ -217,7 +223,6 @@ const handleShoppingList = () => {
   handleHideCheckedItems();
   handleItemSearch();
   handleClickItemName();
-  handleEditItemName();
   handleClearSearchResults();
 };
 
