@@ -7,16 +7,17 @@ const STORE = {
         {name: "milk", checked: true},
         {name: "bread", checked: false}
     ],
-    hideCompleted: false,
+    hideChecked: false,
     searchTerm: null,
     sortBy: 'alpha'
 }
 const UNORDEREDLIST = document.querySelector('.js-shopping-list');
 const TEXTINPUT = document.querySelector('js-shopping-list-entry');
+const CHECKBOX = document.querySelector('.display-checkbox');
 
 
 const generateListElement = (item, itemIndex) => {
-    `
+    return `
     <li class="js-item-index-element" data-item-index="${itemIndex}">
       <span class="shopping-item js-shopping-item ${item.checked ? "shopping-item__checked" : ''}">${item.name}</span>
       <div class="shopping-item-controls">
@@ -33,17 +34,23 @@ const generateListElement = (item, itemIndex) => {
 
 
 function generateShoppingItemsString(shoppingList) {
+  console.log(shoppingList);
   const listElements = shoppingList.map(generateListElement);
+  console.log(listElements);
   return listElements.join('');
 }
 
 
 function renderShoppingList() {
+  let filteredItems = [...STORE.items];
+  if(STORE.hideChecked) {
+    filteredItems = filteredItems.filter(item => !item.checked);
+  } 
   // render the shopping list in the DOM
   console.log('`renderShoppingList` ran');
-  const shoppingListItemsString = generateShoppingItemsString(STORE);
+  const shoppingListItemsString = generateShoppingItemsString(filteredItems);
   // insert that HTML into the DOM
-    UNORDEREDLIST.innerHTML = shoppingListItemsString;
+  UNORDEREDLIST.innerHTML = shoppingListItemsString;
     // $('.js-shopping-list').html(shoppingListItemsString);
 }
 
@@ -68,7 +75,7 @@ function handleNewItemSubmit() {
 
 function toggleCheckedForListItem(itemIndex) {
   console.log("Toggling checked property for item at index " + itemIndex);
-  STORE[itemIndex].checked = !STORE[itemIndex].checked;
+  STORE.items[itemIndex].checked = !STORE.items[itemIndex].checked;
 }
 
 
@@ -99,9 +106,8 @@ function deleteListItem(itemIndex) {
   // of 1. this has the effect of removing the desired item, and shifting all of the
   // elements to the right of `itemIndex` (if any) over one place to the left, so we
   // don't have an empty space in our list.
-  STORE.splice(itemIndex, 1);
+  STORE.items.splice(itemIndex, 1);
 }
-
 
 function handleDeleteItemClicked() {
   // like in `handleItemCheckClicked`, we use event delegation
@@ -115,6 +121,20 @@ function handleDeleteItemClicked() {
   });
 }
 
+const toggleHideCheckedItems = checkboxChecked => {
+  console.log(`Toggled hideCompleted`)
+  STORE.hideChecked = !STORE.hideChecked;
+}
+
+const handleHideCheckedItems = () => {
+  console.log(`Hiding checked items`);
+  CHECKBOX.addEventListener('change', event => {
+    const checkBoxchecked = CHECKBOX.checked;
+    toggleHideCheckedItems(checkBoxchecked);
+    renderShoppingList();
+  });
+};
+
 // this function will be our callback when the page loads. it's responsible for
 // initially rendering the shopping list, and activating our individual functions
 // that handle new item submission and user clicks on the "check" and "delete" buttons
@@ -124,6 +144,7 @@ function handleShoppingList() {
   handleNewItemSubmit();
   handleItemCheckClicked();
   handleDeleteItemClicked();
+  handleHideCheckedItems();
 }
 
 // when the page loads, call `handleShoppingList`
