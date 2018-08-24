@@ -199,8 +199,9 @@ const clearSearchResults = () => {
 const handleClearSearchResults = () => {
   //This function handles clearing search results
   document.querySelector(".js-clear-search-button").addEventListener('click', event => {
-   clearSearchResults();
-   renderShoppingList();
+    clearSearchResults();
+    SEARCHINPUT.value = '';
+    renderShoppingList();
   });
 };
 
