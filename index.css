@@ -49,3 +49,7 @@
   .shopping-item__checked {
     text-decoration: line-through;
   }
+
+  .js-shopping-list-form, .js-clear-search-button {
+    display: inline-block;
+  }

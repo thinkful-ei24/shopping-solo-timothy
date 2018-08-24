@@ -18,7 +18,6 @@ const CHECKBOX = document.querySelector('.display-checkbox');
 
 const generateListElement = (item, itemIndex) => {
     const itemIsChecked = item.checked ? 'shopping-item__checked' : '';
-
     const itemElement = !item.isBeingEdited ? 
       `<span class="shopping-item js-shopping-item ${itemIsChecked}">${item.name}</span>` :
       `<input class="item-edit-input" type="text" required="true" value="${item.name}">`;
@@ -194,6 +193,17 @@ const handleEditItemName = () => {
   });
 }
 
+const clearSearchResults = () => {
+  STORE.searchTerm = null;
+}
+const handleClearSearchResults = () => {
+  //This function handles clearing search results
+  document.querySelector(".js-clear-search-button").addEventListener('click', event => {
+   clearSearchResults();
+   renderShoppingList();
+  });
+};
+
 // this function will be our callback when the page loads. it's responsible for
 // initially rendering the shopping list, and activating our individual functions
 // that handle new item submission and user clicks on the "check" and "delete" buttons
@@ -207,6 +217,7 @@ const handleShoppingList = () => {
   handleItemSearch();
   handleClickItemName();
   handleEditItemName();
+  handleClearSearchResults();
 };
 
 // when the page loads, call `handleShoppingList`
