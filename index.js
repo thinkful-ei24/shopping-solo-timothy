@@ -12,6 +12,7 @@ const STORE = {
     indexOfItemBeingEdited: null
 }
 const UNORDEREDLIST = document.querySelector('.js-shopping-list');
+const ADDITEMFORM = document.querySelector('#js-shopping-list-form');
 const TEXTINPUT = document.querySelector('.js-shopping-list-entry');
 const SEARCHFORM = document.querySelector('#js-search-form');
 const SEARCHINPUT = document.querySelector(".js-shopping-list-search");
@@ -39,7 +40,6 @@ const generateListElement = (item, itemIndex) => {
       </div>
     </li>
     `
-
 };
 
 
@@ -75,11 +75,11 @@ const addItemToShoppingList = itemName => {
 };
 
 function handleNewItemSubmit() {
-  $('#js-shopping-list-form').submit(function(event) {
+  ADDITEMFORM.addEventListener('submit', event => {
     event.preventDefault();
     console.log('`handleNewItemSubmit` ran');
-    const itemName = $('.js-shopping-list-entry').val();
-    $('.js-shopping-list-entry').val('');
+    const itemName = TEXTINPUT.value;
+    TEXTINPUT.value = '';
     addItemToShoppingList(itemName);
     renderShoppingList();
   });
@@ -92,18 +92,18 @@ function toggleCheckedForListItem(itemIndex) {
 
 
 function getItemIndexFromElement(item) {
-  const itemIndexString = $(item)
-    .closest('.js-item-index-element')
-    .attr('data-item-index');
+  const itemIndexString = item.closest('.js-item-index-element').getAttribute('data-item-index');
   return parseInt(itemIndexString, 10);
 }
 
 function handleItemCheckClicked() {
-  $('.js-shopping-list').on('click', `.js-item-toggle`, event => {
-    console.log('`handleItemCheckClicked` ran');
-    const itemIndex = getItemIndexFromElement(event.currentTarget);
-    toggleCheckedForListItem(itemIndex);
-    renderShoppingList();
+  UNORDEREDLIST.addEventListener('click', event => {
+    if(event.target.closest('button').classList.contains(`js-item-toggle`)){
+      console.log('`handleItemCheckClicked` ran');
+      const itemIndex = getItemIndexFromElement(event.target);
+      toggleCheckedForListItem(itemIndex);
+      renderShoppingList();
+    }
   });
 }
 
@@ -123,13 +123,15 @@ function deleteListItem(itemIndex) {
 
 function handleDeleteItemClicked() {
   // like in `handleItemCheckClicked`, we use event delegation
-  $('.js-shopping-list').on('click', '.js-item-delete', event => {
+  UNORDEREDLIST.addEventListener('click', event => {
+    if(event.target.closest('button').classList.contains(`js-item-delete`)){
     // get the index of the item in STORE
-    const itemIndex = getItemIndexFromElement(event.currentTarget);
+      const itemIndex = getItemIndexFromElement(event.target);
     // delete the item
-    deleteListItem(itemIndex);
+      deleteListItem(itemIndex);
     // render the updated shopping list
-    renderShoppingList();
+      renderShoppingList();
+    }
   });
 }
 
@@ -227,4 +229,4 @@ const handleShoppingList = () => {
 };
 
 // when the page loads, call `handleShoppingList`
-$(handleShoppingList);
+document.addEventListener("DOMContentLoaded", handleShoppingList);
