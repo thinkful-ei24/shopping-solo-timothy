@@ -1,15 +1,21 @@
 'use strict';
 
+//Found this unique id generator from searching Google
+//The source is https://gist.github.com/gordonbrander/2230317
+var uniqueId = () => {
+  return '_' + Math.random().toString(36).substr(2, 9);
+};
+
 const STORE = {
   items:[
-    {name: 'apples', checked: false},
-    {name: 'oranges', checked: false},
-    {name: 'milk', checked: true},
-    {name: 'bread', checked: false }
+    {name: 'apples', checked: false, id: uniqueId()},
+    {name: 'oranges', checked: false, id: uniqueId()},
+    {name: 'milk', checked: true, id: uniqueId()},
+    {name: 'bread', checked: false, id: uniqueId()}
   ],
   hideChecked: false,
   searchTerm: null,
-  indexOfItemBeingEdited: null
+  idOfItemBeingEdited: null
 };
 
 const UNORDEREDLIST = document.querySelector('.js-shopping-list');
@@ -20,9 +26,8 @@ const SEARCHINPUT = document.querySelector('.js-shopping-list-search');
 const CHECKBOX = document.querySelector('.display-checkbox');
 
 const generateListElement = (item) => {
-  const itemIndex = item.index;
   const itemIsChecked = item.checked ? 'shopping-item__checked' : '';
-  const itemIsBeingEdited = itemIndex === STORE.indexOfItemBeingEdited;
+  const itemIsBeingEdited = item.id === STORE.idOfItemBeingEdited;
   const itemElement = !itemIsBeingEdited ? 
     `<span class="shopping-item js-shopping-item ${itemIsChecked}">${item.name}</span>` :
     `<form id="edit-item-form">
@@ -30,7 +35,7 @@ const generateListElement = (item) => {
       </form>`;
 
   return `
-    <li class="js-item-index-element" data-item-index="${itemIndex}">
+    <li class="js-item-id-element" data-item-id="${item.id}">
       ${itemElement}
       <div class="shopping-item-controls">
         <button class="shopping-item-toggle js-item-toggle">
@@ -51,33 +56,26 @@ const generateShoppingItemsString = shoppingList => {
 };
 
 const renderShoppingList = () => {
-  let filteredItems = STORE.items.map((item, index) => {
-    return {
-      ...item, 
-      index: index
-    };
-  });
+  let filteredItems = STORE.items;
 
   if(STORE.searchTerm) {
-    //console.log(STORE.searchTerm);  
     filteredItems = filteredItems.filter(item => item.name.toLowerCase().match(STORE.searchTerm.toLowerCase()));
   }
   if(STORE.hideChecked) {
     filteredItems = filteredItems.filter(item => !item.checked);
   }
   // render the shopping list in the DOM
-  //console.log('`renderShoppingList` ran');
   const shoppingListItemsString = generateShoppingItemsString(filteredItems);
   // insert that HTML into the DOM
   UNORDEREDLIST.innerHTML = shoppingListItemsString;
-  // $('.js-shopping-list').html(shoppingListItemsString);
 };
 
 
 const addItemToShoppingList = itemName => {
   STORE.items.push({
     name: itemName, 
-    checked: false
+    checked: false,
+    id: uniqueId()
   });
 };
 
@@ -91,50 +89,42 @@ const handleNewItemSubmit = () => {
   });
 };
 
-const toggleCheckedForListItem = itemIndex => {
-  STORE.items[itemIndex].checked = !STORE.items[itemIndex].checked;
+const toggleCheckedForListItem = itemId => {
+  const checkedItem = STORE.items.find(item => item.id === itemId);
+  checkedItem.checked = !checkedItem.checked;
 };
 
 
-const getItemIndexFromElement = item => {
-  const itemIndexString = item.closest('.js-item-index-element').getAttribute('data-item-index');
-  return parseInt(itemIndexString, 10);
+const getItemIdFromElement = item => {
+  const itemIdString = item.closest('.js-item-id-element').getAttribute('data-item-id');
+  return itemIdString;
 };
 
 const handleItemCheckClicked = () => {
   UNORDEREDLIST.addEventListener('click', event => {
     if(event.target.closest('button') && event.target.closest('button').classList.contains('js-item-toggle')){
       //console.log('`handleItemCheckClicked` ran');
-      const itemIndex = getItemIndexFromElement(event.target);
-      toggleCheckedForListItem(itemIndex);
+      const itemId = getItemIdFromElement(event.target);
+      toggleCheckedForListItem(itemId);
       renderShoppingList();
     }
   });
 };
 
 // name says it all. responsible for deleting a list item.
-const deleteListItem = itemIndex => {
-  //console.log(`Deleting item at index  ${itemIndex} from shopping list`)
-
-  // as with `addItemToShoppingLIst`, this function also has the side effect of
-  // mutating the global STORE value.
-  //
-  // we call `.splice` at the index of the list item we want to remove, with a length
-  // of 1. this has the effect of removing the desired item, and shifting all of the
-  // elements to the right of `itemIndex` (if any) over one place to the left, so we
-  // don't have an empty space in our list.
-  if(itemIndex === STORE.indexOfItemBeingEdited) STORE.indexOfItemBeingEdited = null;
-  STORE.items.splice(itemIndex, 1);
+const deleteListItem = itemId => {
+  if(itemId === STORE.idOfItemBeingEdited) STORE.idOfItemBeingEdited = null;
+  STORE.items = STORE.items.filter(item => item.id !== itemId);
 };
 
 const handleDeleteItemClicked = () => {
   // like in `handleItemCheckClicked`, we use event delegation
   UNORDEREDLIST.addEventListener('click', event => {
     if(event.target.closest('button') && event.target.closest('button').classList.contains('js-item-delete')){
-      // get the index of the item in STORE
-      const itemIndex = getItemIndexFromElement(event.target);
+      // get the id of the item in STORE
+      const itemId = getItemIdFromElement(event.target);
       // delete the item
-      deleteListItem(itemIndex);
+      deleteListItem(itemId);
       // render the updated shopping list
       renderShoppingList();
     }
@@ -148,7 +138,6 @@ const toggleHideCheckedItems = checkboxChecked => {
 
 const handleHideCheckedItems = () => {
   //This function filters the checked items from the list when the checkbox is clicked
-  //console.log('Hiding checked items');
   CHECKBOX.addEventListener('change', () => {
     const checkBoxchecked = CHECKBOX.checked;
     toggleHideCheckedItems(checkBoxchecked);
@@ -169,10 +158,10 @@ const handleItemSearch = () => {
   });
 };
 
-const toggleItemIsBeingEdited = itemIndex => {
+const toggleItemIsBeingEdited = itemId => {
   //This function toggles the isBeingEdited property on the specified object in the Store
   //console.log('item is being edited');
-  STORE.indexOfItemBeingEdited = itemIndex;
+  STORE.idOfItemBeingEdited = itemId;
 };
 
 const handleClickItemName = () => {
@@ -180,17 +169,17 @@ const handleClickItemName = () => {
   UNORDEREDLIST.addEventListener('click', event => {
     // console.log('item is being edited');
     if(event.target.classList.contains('shopping-item')){
-      const itemIndex = getItemIndexFromElement(event.target);
-      toggleItemIsBeingEdited(itemIndex);
+      const itemId = getItemIdFromElement(event.target);
+      toggleItemIsBeingEdited(itemId);
       renderShoppingList();
       handleEditItemName();
     }
   });
 };
 
-const editItemName = (itemIndex, newItemName) => {
-  STORE.items[itemIndex].name = newItemName;
-  STORE.indexOfItemBeingEdited = null;
+const editItemName = (itemId, newItemName) => {
+  STORE.items.find(item => item.id === itemId).name = newItemName;
+  STORE.idOfItemBeingEdited = null;
 };  
 
 const handleEditItemName = () => {
@@ -201,8 +190,8 @@ const handleEditItemName = () => {
     event.preventDefault();
     const editInput = editItemForm.querySelector('input');
     const newItemName = editInput.value;
-    const itemIndex = getItemIndexFromElement(editInput);
-    editItemName(itemIndex, newItemName);
+    const itemId = getItemIdFromElement(editInput);
+    editItemName(itemId, newItemName);
     renderShoppingList(); 
   });
 };
