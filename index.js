@@ -1,34 +1,35 @@
 'use strict';
 
 const STORE = {
-    items:[
-        {name: "apples", checked: false},
-        {name: "oranges", checked: false},
-        {name: "milk", checked: true},
-        {name: "bread", checked: false }
-    ],
-    hideChecked: false,
-    searchTerm: null,
-    indexOfItemBeingEdited: null
-}
+  items:[
+    {name: 'apples', checked: false},
+    {name: 'oranges', checked: false},
+    {name: 'milk', checked: true},
+    {name: 'bread', checked: false }
+  ],
+  hideChecked: false,
+  searchTerm: null,
+  indexOfItemBeingEdited: null
+};
+
 const UNORDEREDLIST = document.querySelector('.js-shopping-list');
 const ADDITEMFORM = document.querySelector('#js-shopping-list-form');
 const TEXTINPUT = document.querySelector('.js-shopping-list-entry');
 const SEARCHFORM = document.querySelector('#js-search-form');
-const SEARCHINPUT = document.querySelector(".js-shopping-list-search");
+const SEARCHINPUT = document.querySelector('.js-shopping-list-search');
 const CHECKBOX = document.querySelector('.display-checkbox');
 
 const generateListElement = (item) => {
-    const itemIndex = item.index;
-    const itemIsChecked = item.checked ? 'shopping-item__checked' : '';
-    const itemIsBeingEdited = itemIndex === STORE.indexOfItemBeingEdited;
-    const itemElement = !itemIsBeingEdited ? 
-      `<span class="shopping-item js-shopping-item ${itemIsChecked}">${item.name}</span>` :
-      `<form id="edit-item-form">
+  const itemIndex = item.index;
+  const itemIsChecked = item.checked ? 'shopping-item__checked' : '';
+  const itemIsBeingEdited = itemIndex === STORE.indexOfItemBeingEdited;
+  const itemElement = !itemIsBeingEdited ? 
+    `<span class="shopping-item js-shopping-item ${itemIsChecked}">${item.name}</span>` :
+    `<form id="edit-item-form">
         <input class="item-edit-input" type="text" required="true" value="${item.name}">
       </form>`;
 
-    return `
+  return `
     <li class="js-item-index-element" data-item-index="${itemIndex}">
       ${itemElement}
       <div class="shopping-item-controls">
@@ -40,82 +41,80 @@ const generateListElement = (item) => {
         </button>
       </div>
     </li>
-    `
+    `;
 };
 
 
-function generateShoppingItemsString(shoppingList) {
+const generateShoppingItemsString = shoppingList => {
   const listElements = shoppingList.map(generateListElement);
   return listElements.join('');
-}
+};
 
-
-function renderShoppingList() {
+const renderShoppingList = () => {
   let filteredItems = STORE.items.map((item, index) => {
     return {
-    ...item, index: index
-    }
+      ...item, 
+      index: index
+    };
   });
 
   if(STORE.searchTerm) {
-    console.log(STORE.searchTerm);  
+    //console.log(STORE.searchTerm);  
     filteredItems = filteredItems.filter(item => item.name.toLowerCase().match(STORE.searchTerm.toLowerCase()));
   }
   if(STORE.hideChecked) {
     filteredItems = filteredItems.filter(item => !item.checked);
   }
   // render the shopping list in the DOM
-  console.log('`renderShoppingList` ran');
+  //console.log('`renderShoppingList` ran');
   const shoppingListItemsString = generateShoppingItemsString(filteredItems);
   // insert that HTML into the DOM
   UNORDEREDLIST.innerHTML = shoppingListItemsString;
-    // $('.js-shopping-list').html(shoppingListItemsString);
-}
+  // $('.js-shopping-list').html(shoppingListItemsString);
+};
 
 
 const addItemToShoppingList = itemName => {
-    STORE.items.push({
-      name: itemName, 
-      checked: false
-    })
+  STORE.items.push({
+    name: itemName, 
+    checked: false
+  });
 };
 
-function handleNewItemSubmit() {
+const handleNewItemSubmit = () => {
   ADDITEMFORM.addEventListener('submit', event => {
     event.preventDefault();
-    console.log('`handleNewItemSubmit` ran');
     const itemName = TEXTINPUT.value;
     TEXTINPUT.value = '';
     addItemToShoppingList(itemName);
     renderShoppingList();
   });
-}
+};
 
-function toggleCheckedForListItem(itemIndex) {
-  console.log("Toggling checked property for item at index " + itemIndex);
+const toggleCheckedForListItem = itemIndex => {
   STORE.items[itemIndex].checked = !STORE.items[itemIndex].checked;
-}
+};
 
 
-function getItemIndexFromElement(item) {
+const getItemIndexFromElement = item => {
   const itemIndexString = item.closest('.js-item-index-element').getAttribute('data-item-index');
   return parseInt(itemIndexString, 10);
-}
+};
 
-function handleItemCheckClicked() {
+const handleItemCheckClicked = () => {
   UNORDEREDLIST.addEventListener('click', event => {
-    if(event.target.closest('button') && event.target.closest('button').classList.contains(`js-item-toggle`)){
-      console.log('`handleItemCheckClicked` ran');
+    if(event.target.closest('button') && event.target.closest('button').classList.contains('js-item-toggle')){
+      //console.log('`handleItemCheckClicked` ran');
       const itemIndex = getItemIndexFromElement(event.target);
       toggleCheckedForListItem(itemIndex);
       renderShoppingList();
     }
   });
-}
+};
 
 // name says it all. responsible for deleting a list item.
-function deleteListItem(itemIndex) {
-  console.log(`Deleting item at index  ${itemIndex} from shopping list`)
+const deleteListItem = itemIndex => {
+  //console.log(`Deleting item at index  ${itemIndex} from shopping list`)
 
   // as with `addItemToShoppingLIst`, this function also has the side effect of
   // mutating the global STORE value.
@@ -125,31 +124,31 @@ function deleteListItem(itemIndex) {
   // elements to the right of `itemIndex` (if any) over one place to the left, so we
   // don't have an empty space in our list.
   STORE.items.splice(itemIndex, 1);
-}
+};
 
-function handleDeleteItemClicked() {
+const handleDeleteItemClicked = () => {
   // like in `handleItemCheckClicked`, we use event delegation
   UNORDEREDLIST.addEventListener('click', event => {
-    if(event.target.closest('button') && event.target.closest('button').classList.contains(`js-item-delete`)){
-    // get the index of the item in STORE
+    if(event.target.closest('button') && event.target.closest('button').classList.contains('js-item-delete')){
+      // get the index of the item in STORE
       const itemIndex = getItemIndexFromElement(event.target);
-    // delete the item
+      // delete the item
       deleteListItem(itemIndex);
-    // render the updated shopping list
+      // render the updated shopping list
       renderShoppingList();
     }
   });
-}
+};
 
 const toggleHideCheckedItems = checkboxChecked => {
-  console.log(`Toggled hideCompleted`)
-  STORE.hideChecked = !STORE.hideChecked;
-}
+  //console.log('Toggled hideCompleted')
+  STORE.hideChecked = checkboxChecked;
+};
 
 const handleHideCheckedItems = () => {
   //This function filters the checked items from the list when the checkbox is clicked
-  console.log(`Hiding checked items`);
-  CHECKBOX.addEventListener('change', event => {
+  //console.log('Hiding checked items');
+  CHECKBOX.addEventListener('change', () => {
     const checkBoxchecked = CHECKBOX.checked;
     toggleHideCheckedItems(checkBoxchecked);
     renderShoppingList();
@@ -160,7 +159,7 @@ const setSearchTerm = searchTerm => STORE.searchTerm = searchTerm;
 
 const handleItemSearch = () => {
   //This function displays matching items when the user submits a search term
-  console.log('Searching item');
+  //console.log('Searching item');
   SEARCHFORM.addEventListener('submit',event =>{
     event.preventDefault();
     const searchTerm = SEARCHINPUT.value;
@@ -171,7 +170,7 @@ const handleItemSearch = () => {
 
 const toggleItemIsBeingEdited = itemIndex => {
   //This function toggles the isBeingEdited property on the specified object in the Store
-  console.log('item is being edited');
+  //console.log('item is being edited');
   STORE.indexOfItemBeingEdited = itemIndex;
 };
 
@@ -205,14 +204,15 @@ const handleEditItemName = () => {
     editItemName(itemIndex, newItemName);
     renderShoppingList(); 
   });
-}
+};
 
 const clearSearchResults = () => {
   STORE.searchTerm = null;
-}
+};
+
 const handleClearSearchResults = () => {
   //This function handles clearing search results
-  document.querySelector(".js-clear-search-button").addEventListener('click', event => {
+  document.querySelector('.js-clear-search-button').addEventListener('click', ()=> {
     clearSearchResults();
     SEARCHINPUT.value = '';
     renderShoppingList();
@@ -235,4 +235,4 @@ const handleShoppingList = () => {
 };
 
 // when the page loads, call `handleShoppingList`
-document.addEventListener("DOMContentLoaded", handleShoppingList);
+document.addEventListener('DOMContentLoaded', handleShoppingList);
