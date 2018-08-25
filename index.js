@@ -34,6 +34,7 @@ const generateListElement = (item) => {
         <input class="item-edit-input" type="text" required="true" value="${item.name}" pattern="[a-zA-Z]+">
       </form>`;
 
+  //Store item id as an attribute on the li element. This will be our reference to the item in STORE 
   return `
     <li class="js-item-id-element" data-item-id="${item.id}">
       ${itemElement}
@@ -58,6 +59,8 @@ const generateShoppingItemsString = shoppingList => {
 const renderShoppingList = () => {
   let filteredItems = STORE.items;
 
+  //Use filter method to avoid mutating the STORE
+  //Filter items if a search term was provided and/or the user hides checked items
   if(STORE.searchTerm) {
     filteredItems = filteredItems.filter(item => item.name.toLowerCase().match(STORE.searchTerm.toLowerCase()));
   }
@@ -71,6 +74,7 @@ const renderShoppingList = () => {
 };
 
 
+//Push a new item to STORE with a unique id
 const addItemToShoppingList = itemName => {
   STORE.items.push({
     name: itemName, 
@@ -79,6 +83,7 @@ const addItemToShoppingList = itemName => {
   });
 };
 
+//This function sets the listener on the add item form
 const handleNewItemSubmit = () => {
   ADDITEMFORM.addEventListener('submit', event => {
     event.preventDefault();
@@ -149,7 +154,6 @@ const setSearchTerm = searchTerm => STORE.searchTerm = searchTerm;
 
 const handleItemSearch = () => {
   //This function displays matching items when the user submits a search term
-  //console.log('Searching item');
   SEARCHFORM.addEventListener('submit',event =>{
     event.preventDefault();
     const searchTerm = SEARCHINPUT.value;
@@ -159,19 +163,19 @@ const handleItemSearch = () => {
 };
 
 const toggleItemIsBeingEdited = itemId => {
-  //This function toggles the isBeingEdited property on the specified object in the Store
-  //console.log('item is being edited');
+  //This function tells the STORE which item is being edited
   STORE.idOfItemBeingEdited = itemId;
 };
 
 const handleClickItemName = () => {
   //This function handles when user clicks on an item in the list
   UNORDEREDLIST.addEventListener('click', event => {
-    // console.log('item is being edited');
     if(event.target.classList.contains('shopping-item')){
       const itemId = getItemIdFromElement(event.target);
       toggleItemIsBeingEdited(itemId);
       renderShoppingList();
+      //The submit event does not bubble up from the form element
+      //This set listeners on the edit item form as soon as it is rendered to DOM
       handleEditItemName();
     }
   });
