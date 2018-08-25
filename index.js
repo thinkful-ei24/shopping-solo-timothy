@@ -2,9 +2,9 @@
 
 const STORE = {
     items:[
-        {name: "apples", checked: false },
-        {name: "oranges", checked: false },
-        {name: "milk", checked: true },
+        {name: "apples", checked: false},
+        {name: "oranges", checked: false},
+        {name: "milk", checked: true},
         {name: "bread", checked: false }
     ],
     hideChecked: false,
@@ -18,7 +18,8 @@ const SEARCHFORM = document.querySelector('#js-search-form');
 const SEARCHINPUT = document.querySelector(".js-shopping-list-search");
 const CHECKBOX = document.querySelector('.display-checkbox');
 
-const generateListElement = (item, itemIndex) => {
+const generateListElement = (item) => {
+    const itemIndex = item.index;
     const itemIsChecked = item.checked ? 'shopping-item__checked' : '';
     const itemIsBeingEdited = itemIndex === STORE.indexOfItemBeingEdited;
     const itemElement = !itemIsBeingEdited ? 
@@ -50,7 +51,12 @@ function generateShoppingItemsString(shoppingList) {
 
 
 function renderShoppingList() {
-  let filteredItems = [...STORE.items];
+  let filteredItems = STORE.items.map((item, index) => {
+    return {
+    ...item, index: index
+    }
+  });
+
   if(STORE.searchTerm) {
     console.log(STORE.searchTerm);  
     filteredItems = filteredItems.filter(item => item.name.toLowerCase().match(STORE.searchTerm.toLowerCase()));
@@ -98,7 +104,7 @@ function getItemIndexFromElement(item) {
 
 function handleItemCheckClicked() {
   UNORDEREDLIST.addEventListener('click', event => {
-    if(event.target.closest('button').classList.contains(`js-item-toggle`)){
+    if(event.target.closest('button') && event.target.closest('button').classList.contains(`js-item-toggle`)){
       console.log('`handleItemCheckClicked` ran');
       const itemIndex = getItemIndexFromElement(event.target);
       toggleCheckedForListItem(itemIndex);
@@ -124,7 +130,7 @@ function deleteListItem(itemIndex) {
 function handleDeleteItemClicked() {
   // like in `handleItemCheckClicked`, we use event delegation
   UNORDEREDLIST.addEventListener('click', event => {
-    if(event.target.closest('button').classList.contains(`js-item-delete`)){
+    if(event.target.closest('button') && event.target.closest('button').classList.contains(`js-item-delete`)){
     // get the index of the item in STORE
       const itemIndex = getItemIndexFromElement(event.target);
     // delete the item
