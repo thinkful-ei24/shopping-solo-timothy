@@ -26,7 +26,7 @@ const generateListElement = (item) => {
   const itemElement = !itemIsBeingEdited ? 
     `<span class="shopping-item js-shopping-item ${itemIsChecked}">${item.name}</span>` :
     `<form id="edit-item-form">
-        <input class="item-edit-input" type="text" required="true" value="${item.name}">
+        <input class="item-edit-input" type="text" required="true" value="${item.name}" pattern="[a-zA-Z]+">
       </form>`;
 
   return `
@@ -123,6 +123,7 @@ const deleteListItem = itemIndex => {
   // of 1. this has the effect of removing the desired item, and shifting all of the
   // elements to the right of `itemIndex` (if any) over one place to the left, so we
   // don't have an empty space in our list.
+  if(itemIndex === STORE.indexOfItemBeingEdited) STORE.indexOfItemBeingEdited = null;
   STORE.items.splice(itemIndex, 1);
 };
 
